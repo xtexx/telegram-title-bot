@@ -92,7 +92,10 @@ bot.command([`detitle${CMD_SUFFIX}`, `untitle${CMD_SUFFIX}`], async (ctx) => {
 	const target = ctx.args[0] ?? null;
 	let targetUser: ChatMember;
 	if (target == null) {
-		targetUser = await ctx.getChatMember(ctx.message.from.id);
+		const replyTarget = ctx.message.reply_to_message?.from?.id;
+		targetUser = await ctx.getChatMember(
+			replyTarget ?? ctx.message.from.id,
+		);
 	} else {
 		try {
 			targetUser = await ctx.getChatMember(parseInt(target));
