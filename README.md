@@ -1,4 +1,4 @@
 # Telegram Self-Service Title Bot
 
-- `/t <YOUR TITLE>` Set your title
-- `/detitle <YOUR TITLE>` Set your title
+- `/(t|title) <YOUR TITLE>` Set your title
+- `/(de|un)title [USER]` Remove one's title

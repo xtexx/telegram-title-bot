@@ -1,21 +1,132 @@
-import { Telegraf } from 'telegraf';
+import { Context, Telegraf } from 'telegraf';
+import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 
-import { about } from './commands';
-import { greeting } from './text';
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { development, production } from './core';
+import { name, version, author } from '../package.json';
+import { ChatMember } from 'telegraf/typings/core/types/typegram';
 
 const BOT_TOKEN = process.env.BOT_TOKEN || '';
+const CMD_SUFFIX = process.env.CMD_SUFFIX || '';
 const ENVIRONMENT = process.env.NODE_ENV || '';
 
 const bot = new Telegraf(BOT_TOKEN);
 
-bot.command('about', about());
-bot.on('message', greeting());
+async function replyTo(
+	ctx: Context,
+	message: string,
+	extra?: ExtraReplyMessage,
+) {
+	const messageId = ctx.message?.message_id;
+	if (messageId == null) {
+		throw new Error('message_id is null');
+	}
+	await ctx.reply(message, {
+		reply_parameters: { message_id: messageId },
+		...extra,
+	});
+}
 
-//prod mode (Vercel)
+function checkUserRealAdmin(user: ChatMember): boolean {
+	if (user.status == 'creator') return true;
+	if (user.status == 'administrator') {
+		for (let k in user) {
+			if (k == 'can_manage_chat') continue;
+			if ((user as any)[k] === true) return true;
+		}
+	}
+	return false;
+}
+
+bot.help(async (ctx) => {
+	const message = `*${name} ${version}*\n${author}\nSee [here](https://codeberg.org/xtex/telegram-title-bot) for more details.`;
+	await ctx.replyWithMarkdownV2(message);
+});
+
+bot.catch(async (err, ctx) => {
+	await replyTo(ctx, `Error: ${err}`);
+});
+
+bot.command([`t${CMD_SUFFIX}`, `title${CMD_SUFFIX}`], async (ctx) => {
+	if (ctx.chat.type != 'group' && ctx.chat.type != 'supergroup')
+		return await replyTo(ctx, 'This message can only be used in groups.');
+	const title = ctx.args[0] ?? null;
+	if (title == null) return await replyTo(ctx, 'Usage: /t <YOUR TITLE>');
+
+	let member = await ctx.getChatMember(ctx.message.from.id);
+	if (['member', 'creator', 'administrator'].includes(member.status)) {
+		if (member.status == 'member') {
+			await ctx.promoteChatMember(member.user.id, {
+				is_anonymous: false,
+				can_manage_chat: false,
+				can_delete_messages: false,
+				can_manage_video_chats: false,
+				can_restrict_members: false,
+				can_promote_members: false,
+				can_change_info: false,
+				can_invite_users: false,
+				can_post_stories: false,
+				can_edit_stories: false,
+				can_delete_stories: false,
+				can_pin_messages: false,
+				can_manage_topics: false,
+			});
+			await replyTo(ctx, 'Promoted to administrator');
+		}
+		await ctx.setChatAdministratorCustomTitle(member.user.id, title);
+		await replyTo(ctx, `Title set: \`${title}\``, {
+			parse_mode: 'MarkdownV2',
+		});
+	} else await replyTo(ctx, `Bad membership status: ${member.status}`);
+});
+
+bot.command([`detitle${CMD_SUFFIX}`, `untitle${CMD_SUFFIX}`], async (ctx) => {
+	if (ctx.chat.type != 'group' && ctx.chat.type != 'supergroup')
+		return await replyTo(ctx, 'This message can only be used in groups.');
+
+	let sender = await ctx.getChatMember(ctx.message.from.id);
+	if (checkUserRealAdmin(sender))
+		return await replyTo(ctx, 'Only administrators can do');
+
+	const target = ctx.args[0] ?? null;
+	let targetUser: ChatMember;
+	if (target == null) {
+		targetUser = await ctx.getChatMember(ctx.message.from.id);
+	} else {
+		try {
+			targetUser = await ctx.getChatMember(parseInt(target));
+		} catch {
+			return await replyTo(ctx, 'Invalid user ID');
+		}
+	}
+
+	if (targetUser.status == 'administrator') {
+		if (checkUserRealAdmin(targetUser))
+			return await replyTo(
+				ctx,
+				'Cannot be used against real administrators',
+			);
+
+		await ctx.promoteChatMember(targetUser.user.id, {
+			is_anonymous: false,
+			can_manage_chat: false,
+			can_delete_messages: false,
+			can_manage_video_chats: false,
+			can_restrict_members: false,
+			can_promote_members: false,
+			can_change_info: false,
+			can_invite_users: false,
+			can_post_stories: false,
+			can_edit_stories: false,
+			can_delete_stories: false,
+			can_pin_messages: false,
+			can_manage_topics: false,
+		});
+		await replyTo(ctx, 'Demoted user');
+	} else await replyTo(ctx, `Bad membership status: ${targetUser.status}`);
+});
+
 export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
-  await production(req, res, bot);
+	await production(req, res, bot);
 };
-//dev mode
 ENVIRONMENT !== 'production' && development(bot);
