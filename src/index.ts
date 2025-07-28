@@ -85,7 +85,7 @@ bot.command([`detitle${CMD_SUFFIX}`, `untitle${CMD_SUFFIX}`], async (ctx) => {
 		return await replyTo(ctx, 'This message can only be used in groups.');
 
 	let sender = await ctx.getChatMember(ctx.message.from.id);
-	if (checkUserRealAdmin(sender))
+	if (!checkUserRealAdmin(sender))
 		return await replyTo(ctx, 'Only administrators can do');
 
 	const target = ctx.args[0] ?? null;
