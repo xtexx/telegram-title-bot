@@ -4,6 +4,7 @@
 	"description": "Telegram Self-Service Title Bot",
 	"main": "src/index.ts",
 	"author": "xtex",
+	"type": "module",
 	"homepage": "https://codeberg.org/xtex/telegram-title-bot",
 	"dependencies": {
 		"@vercel/node": "^5.3.7",

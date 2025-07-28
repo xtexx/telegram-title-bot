@@ -1,10 +1,11 @@
 {
+	"$schema": "https://openapi.vercel.sh/vercel.json",
 	"version": 2,
 	"public": true,
 	"rewrites": [
 		{
-			"source": "/(.*)",
-			"destination": "api/index"
+			"source": "/api/(.*)",
+			"destination": "api/index.js"
 		}
 	],
 	"redirects": [
@@ -13,5 +14,11 @@
 			"destination": "/api",
 			"permanent": false
 		}
-	]
+	],
+	"functions": {
+		"api/index.js": {
+			"runtime": "@vercel/node",
+			"maxDuration": 20
+		}
+	}
 }
