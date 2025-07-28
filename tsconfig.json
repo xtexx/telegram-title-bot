@@ -6,7 +6,7 @@
     "module": "commonjs",
     "skipLibCheck": true,
     "sourceMap": true,
-    "outDir": "public/api",
+    "outDir": "public",
     "lib": ["esnext", "dom"],
     "resolveJsonModule": true
   },
