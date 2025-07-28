@@ -38,9 +38,9 @@ function checkUserRealAdmin(user: ChatMember): boolean {
 	return false;
 }
 
-bot.help(async (ctx) => {
-	const message = `*${name} ${version}*\n${author}\nSee [here](https://codeberg.org/xtex/telegram-title-bot) for more details.`;
-	await ctx.replyWithMarkdownV2(message);
+bot.command(['help', 'start'], async (ctx) => {
+	const message = `${name} ${version}\n${author}\nSee https://codeberg.org/xtex/telegram-title-bot for more details.`;
+	await ctx.reply(message);
 });
 
 bot.catch(async (err, ctx) => {
