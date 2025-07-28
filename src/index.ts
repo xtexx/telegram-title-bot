@@ -45,6 +45,7 @@ bot.help(async (ctx) => {
 
 bot.catch(async (err, ctx) => {
 	await replyTo(ctx, `Error: ${err}`);
+	throw err;
 });
 
 bot.command([`t${CMD_SUFFIX}`, `title${CMD_SUFFIX}`], async (ctx) => {
