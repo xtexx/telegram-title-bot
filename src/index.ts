@@ -59,7 +59,7 @@ bot.command([`t${CMD_SUFFIX}`, `title${CMD_SUFFIX}`], async (ctx) => {
 		if (member.status == 'member') {
 			await ctx.promoteChatMember(member.user.id, {
 				is_anonymous: false,
-				can_manage_chat: false,
+				can_manage_chat: true,
 				can_delete_messages: false,
 				can_manage_video_chats: false,
 				can_restrict_members: false,
