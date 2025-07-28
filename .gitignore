@@ -8,6 +8,7 @@
 /build
 /dist
 /public
+/api
 
 # misc
 .DS_Store
