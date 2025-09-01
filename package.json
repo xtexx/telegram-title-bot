@@ -6,7 +6,7 @@
 	"author": "xtex",
 	"homepage": "https://codeberg.org/xtex/telegram-title-bot",
 	"dependencies": {
-		"@vercel/node": "^5.3.7",
+		"@vercel/node": "^5.3.17",
 		"dotenv-cli": "^8.0.0",
 		"telegraf": "^4.16.3"
 	},
